@@ -1,0 +1,1 @@
+Where do we give the frontend a chance to cache userId? On authentication only?
