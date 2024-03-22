@@ -1,43 +1,56 @@
 import mongoose from "mongoose";
 
-// When an order is placed, you have to clear the cart.
-const orderSchema = new mongoose.Schema({
-  user: {
+// A user can have multiple orders, created at different times.
+const orderItemSchema = new mongoose.Schema({
+  product: {
     type: mongoose.Types.ObjectId,
-    ref: "User",
-    required: [true, "Please provide a user"],
+    ref: "Product",
+    required: [true, "Please provide a product id"],
   },
-  // Items are to be built based on cart items.
-  items: [
-    {
-      product: {
-        type: mongoose.Types.ObjectId,
-        ref: "Product",
-        required: [true, "Please provide a product"],
-      },
-      quantity: {
-        type: Number,
-        min: 0,
-        required: [true, "Please provide a product quantity > 0"],
-      },
-    },
-  ],
-  status: {
-    type: String,
-    enum: ["PENDING", "SETTLED", "CANCELLED"],
-    default: "PENDING",
+  qty: {
+    type: Number,
+    min: 1,
+    required: [true, "Please provide a product quantity > 0"],
+    alias: "quantity",
   },
 });
 
-orderSchema.methods.settle = async function () {
-  this.status = "SETTLED";
-  this.save();
+const orderSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
+      index: true,
+      required: [true, "Please provide a user"],
+    },
+    items: [orderItemSchema],
+    status: {
+      type: String,
+      enum: ["PENDING", "SETTLED", "CANCELLED"],
+      default: "PENDING",
+    },
+  },
+  { timestamps: true }
+);
+
+orderSchema.statics.settle = async function (orderId, userId) {
+  const order = await Order.findOneAndUpdate(
+    { _id: orderId, user: userId },
+    { $set: { status: "SETTLED" } },
+    { new: true }
+  ).exec();
+  return order;
 };
 
-orderSchema.methods.cancel = async function () {
-  this.status = "CANCELLED";
-  this.save();
+orderSchema.statics.cancel = async function (orderId, userId) {
+  const order = await Order.findOneAndUpdate(
+    { _id: orderId, user: userId },
+    { $set: { status: "CANCELLED" } },
+    { new: true }
+  ).exec();
+  return order;
 };
 
 const Order = mongoose.model("Order", orderSchema);
+
 export { Order };
