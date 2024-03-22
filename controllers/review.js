@@ -5,11 +5,28 @@ import { getDocOr404 } from "../utils/getDocOr404.js";
 import { Review } from "../models/Review.js";
 import { ResourceNotFoundError } from "../errors/resource.js";
 
+// We don't allow review updates.
+
+/** GET. */
+const getProductReviews = asyncHandler(async (req, res) => {
+  // DOES THIS NEED PAGINATION?
+  const reviews = await Review.find({ productId: req.params.productId }).exec();
+  res.status(StatusCodes.OK).json(reviews);
+});
+
+/** GET. */
 const getReview = asyncHandler(async (req, res) => {
   const review = await getDocOr404(Review, { _id: req.params.id });
   res.status(StatusCodes.OK).json({ review });
 });
 
+/** POST. */
+const createReview = asyncHandler(async (req, res) => {
+  await Review.Create(req.body).exec();
+  res.status(StatusCodes.CREATED);
+});
+
+/** DELETE. */
 const deleteReview = asyncHandler(async (req, res) => {
   const review = await Review.findOneAndRemove({
     _id: req.params.id,
@@ -23,4 +40,4 @@ const deleteReview = asyncHandler(async (req, res) => {
   res.status(StatusCodes.NO_CONTENT);
 });
 
-export { getReview, deleteReview };
+export { getReview, getProductReviews, createReview, deleteReview };
