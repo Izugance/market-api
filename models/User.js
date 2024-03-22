@@ -2,8 +2,6 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { env } from "node:process";
 
-import { Cart } from "./Cart.js";
-
 const userSchema = new mongoose.Schema(
   {
     email: {
@@ -19,12 +17,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please provide a password"],
     },
-    // Set on creation.
-    // cartId: {
-    //   type: mongoose.Types.ObjectId,
-    //   ref: "Cart",
-    //   required: [true, "Please provide the user's cartId"],
-    // },
   },
   { timestamps: true }
 );
