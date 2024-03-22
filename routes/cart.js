@@ -4,7 +4,7 @@ import {
   getUserCart,
   createCartItem,
   deleteCartItem,
-  updateCartItemQuantity,
+  updateCartItem,
   clearUserCart,
 } from "../controllers/cart.js";
 
@@ -13,10 +13,12 @@ const cartRouter = express.Router();
 // All cart operations are protected by the userAuthMiddleware.
 // userId col on cart table is unique.
 // Cart activities are tied to current User.
-cartRouter.route("/").get(getUserCart);
-cartRouter.route("/add").post(createCartItem);
-cartRouter.route("/update").patch(updateCartItemQuantity);
+cartRouter
+  .route("/")
+  .get(getUserCart)
+  .post(createCartItem)
+  .patch(updateCartItem)
+  .delete(clearUserCart);
 cartRouter.route("/:itemId").delete(deleteCartItem);
-cartRouter.route("/clear").delete(clearUserCart);
 
 export { cartRouter };
