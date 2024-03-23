@@ -2,15 +2,12 @@ import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
 
 import { Product } from "../models/Product.js";
-import { Review } from "../models/Review.js";
 import { getDocOr404 } from "../utils/getDocOr404.js";
 
-/** POST. */
+/** POST a new product. */
 const createProduct = asyncHandler(async (req, res) => {
-  const product = await Product.Create(req.body).exec();
-  res
-    .status(StatusCodes.CREATED)
-    .json({ msg: `Product ${product.name} created` });
+  await Product.Create(req.body).exec();
+  res.status(StatusCodes.CREATED);
 });
 
 /** GET. */
@@ -34,22 +31,22 @@ const getProduct = asyncHandler(async (req, res) => {
 /** PUT */
 const updateProduct = asyncHandler(async (req, res) => {
   // Updatable fields: Description, price.
+  const updatable = {};
+  if (req.body.description) {
+    updatable.description = req.body.description;
+  }
+  if (req.body.price) {
+    updatable.price = req.body.price;
+  }
+  await Product.findByIdAndUpdate(req.params.id, updatable);
+  res.status(StatusCodes.NO_CONTENT);
 });
 
 // Guarded by admin auth.
 /** DELETE */
 const deleteProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findByIdAndRemove(req.params.id).exec();
-  res.status(StatusCodes.OK).json({ msg: `Product ${product.name} deleted` });
-});
-
-// Reviews are always tied to a product on creation.
-/** POST */
-const createReview = asyncHandler(async (req, res) => {
-  const review = await Review.Create(req.body).exec();
-  res
-    .status(StatusCodes.CREATED)
-    .json({ msg: `Review for product '${review.product}' created` });
+  await Product.findByIdAndRemove(req.params.id).exec();
+  res.status(StatusCodes.NO_CONTENT);
 });
 
 export {
@@ -58,5 +55,4 @@ export {
   getProduct,
   updateProduct,
   deleteProduct,
-  createReview,
 };
