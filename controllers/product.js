@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 
 import { Product } from "../models/Product.js";
 import { getDocOr404 } from "../utils/getDocOr404.js";
+import { getPaginationParams } from "../utils/pagination.js";
 
 /** POST a new product. */
 const createProduct = asyncHandler(async (req, res) => {
@@ -17,8 +18,10 @@ const getAllProducts = asyncHandler(async (req, res) => {
   if (req.query.category) {
     query[categories] = req.query.category;
   }
-  // REPLACE ME------------------------------------------------------------------
-  const products = await Product.find(query).exec().limit(10).skip(0);
+  const page = Number(req.query.page) || 1;
+  const _limit = Number(req.query.limit) || 16;
+  const { skip, limit } = getPaginationParams(_limit, page);
+  const products = await Product.find(query).skip(skip).limit(limit).exec();
   res.status(StatusCodes.OK).json({ products });
 });
 
