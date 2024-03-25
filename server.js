@@ -14,6 +14,8 @@ import { reviewRouter } from "./routes/review.js";
 import { categoryRouter } from "./routes/category.js";
 import { orderRouter } from "./routes/order.js";
 import { cartRouter } from "./routes/cart.js";
+import { controllerErrorHandler } from "./middleware/controller-error-handler.js";
+import { endpoint404Handler } from "./middleware/endpoint-404-handler.js";
 
 const app = express();
 app.use(express.json());
@@ -33,8 +35,9 @@ app.use(apiRoot + "/products", productRouter);
 app.use(apiRoot + "/reviews", reviewRouter);
 app.use(apiRoot + "/orders", orderRouter);
 
-// -----Sys health middleware-----
-app.use(cors());
+// -----Middleware-----
+app.use(controllerErrorHandler);
+app.use(endpoint404Handler);
 
 // -----Server setup-----
 const server = createServer(app);
