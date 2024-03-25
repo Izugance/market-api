@@ -1,6 +1,6 @@
 import express from "express";
 import { createServer } from "node:http";
-import { env } from "node:process";
+import "dotenv/config";
 import helmet from "helmet";
 import xssClean from "xss-clean";
 import cors from "cors";
@@ -38,7 +38,7 @@ app.use(cors());
 
 // -----Server setup-----
 const server = createServer(app);
-const PORT = env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 const serve = async () => {
   try {

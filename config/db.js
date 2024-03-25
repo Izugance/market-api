@@ -1,10 +1,10 @@
-import { env } from "node:process";
 import mongoose from "mongoose";
+import "dotenv/config";
 
 const connectDB = async () => {
-  const connection = await mongoose.connect(env.MONGO_URI, {
-    autoIndex: env.AUTO_INDEX,
-    autoCreate: env.AUTO_CREATE,
+  const connection = await mongoose.connect(process.env.MONGO_URI, {
+    autoIndex: process.env.AUTO_INDEX,
+    autoCreate: process.env.AUTO_CREATE,
   });
   console.log("Connected to the DB");
   return connection;
