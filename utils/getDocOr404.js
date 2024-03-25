@@ -1,4 +1,4 @@
-import { ResourceNotFoundError } from "../errors/resource";
+import { ResourceNotFoundError } from "../errors/resource.js";
 
 /** If you're querying by id, set `getBy` to `{_id: value}`. You can't use
  * `id` if it's not set in your schema as it would be a virtual; you can't
