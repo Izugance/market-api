@@ -7,7 +7,7 @@ import { getPaginationParams } from "../utils/pagination.js";
 
 /** POST a new product. */
 const createProduct = asyncHandler(async (req, res) => {
-  await Product.Create(req.body).exec();
+  await Product.Create(req.body);
   res.status(StatusCodes.CREATED);
 });
 

@@ -22,7 +22,7 @@ const getReview = asyncHandler(async (req, res) => {
 
 /** POST. */
 const createReview = asyncHandler(async (req, res) => {
-  await Review.Create(req.body).exec();
+  await Review.Create(req.body);
   res.status(StatusCodes.CREATED);
 });
 

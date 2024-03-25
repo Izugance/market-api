@@ -14,9 +14,9 @@ const registerUser = asyncHandler(async (req, res) => {
 
   await session.withTransaction(async () => {
     const { email, password } = req.body;
-    const user = await User.create({ email, password }).exec();
+    const user = await User.create({ email, password });
     const token = await user.genJwt();
-    await Cart.create({ user: user._id }).exec();
+    await Cart.create({ user: user._id });
     res.status(StatusCodes.CREATED).json({ userId: user._id, token });
   });
 
@@ -37,7 +37,7 @@ const loginUser = asyncHandler(async (req, res) => {
 // NOTE: Admin registration should be made more secure for the firm.
 const registerAdmin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const admin = await Admin.create({ email, password }).exec();
+  const admin = await Admin.create({ email, password });
   const token = await admin.genJwt();
   res.status(StatusCodes.CREATED).json({ AdminId: admin._id, token });
 });
