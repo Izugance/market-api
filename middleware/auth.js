@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import { env } from "node:process";
 
-import { AuthError } from "../errors/auth";
+import { AuthError } from "../errors/auth.js";
 
 const verifyAuthHeader = (header, role, secret) => {
   if (!(header && header.startsWith("Bearer"))) {
