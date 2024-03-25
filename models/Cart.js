@@ -21,7 +21,6 @@ const cartSchema = new mongoose.Schema({
     ref: "User",
     required: true,
     unique: true,
-    index: true,
   },
   items: [cartItemSchema],
 });
