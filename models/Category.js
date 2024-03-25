@@ -16,7 +16,9 @@ const categorySchema = new mongoose.Schema({
 
 // We save all category names in title case.
 categorySchema.pre("save", function (next) {
-  this.name = toTitleCase(this.name);
+  if (this.name) {
+    this.name = toTitleCase(this.name);
+  }
   next();
 });
 
