@@ -12,5 +12,3 @@ export const getPaginationParams = (limit, page) => {
 
   return { skip, limit };
 };
-
-export { getPaginationParams };
