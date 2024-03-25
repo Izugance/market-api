@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { env } from "node:process";
 import helmet from "helmet";
 import xssClean from "xss-clean";
+import cors from "cors";
 
 import { connectDB } from "./config/db.js";
 import { adminAuthMiddleware, userAuthMiddleware } from "./middleware/auth.js";
