@@ -7,8 +7,8 @@ import { getPaginationParams } from "../utils/pagination.js";
 
 /** POST a new product. */
 const createProduct = asyncHandler(async (req, res) => {
-  await Product.Create(req.body);
-  res.status(StatusCodes.CREATED);
+  const product = await Product.Create(req.body);
+  res.status(StatusCodes.CREATED).json({ _id: product._id });
 });
 
 /** GET. */

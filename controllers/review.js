@@ -22,8 +22,8 @@ const getReview = asyncHandler(async (req, res) => {
 
 /** POST. */
 const createReview = asyncHandler(async (req, res) => {
-  await Review.Create(req.body);
-  res.status(StatusCodes.CREATED);
+  const review = await Review.Create(req.body);
+  res.status(StatusCodes.CREATED).json({ _id: review.id });
 });
 
 /** DELETE. */
