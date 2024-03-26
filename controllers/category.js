@@ -4,57 +4,55 @@ import { StatusCodes } from "http-status-codes";
 import { connectDB } from "../config/db.js";
 import { Category } from "../models/Category.js";
 import { Product } from "../models/Product.js";
-import { BadRequestError } from "../errors/index.js";
+import { BadRequestError, ResourceNotFoundError } from "../errors/index.js";
 
 /** POST. */
-const createTopCategory = asyncHandler(async (req, res) => {
+const createRootCategory = asyncHandler(async (req, res) => {
   const category = await Category.create({
     name: req.body.name,
-  }).exec();
-  res.status(StatusCodes.CREATED).json({ category: category.name });
+  });
+  res.status(StatusCodes.CREATED).json({ _id: category._id });
 });
-
-// We use a maximum depth of 2 for each base category.
-const MAX_CATEGORY_DEPTH = 2;
 
 /** POST. */
 const createSubcategory = asyncHandler(async (req, res) => {
   // Get the proposed parent and ensure it's a root.
-  const parent = await Category.findById({
-    parent: req.params.parentId,
-  }).exec();
-  if (parent.parent)
-    throw new BadRequestError(
-      `Attempt at creating a subcategory at a depth beyond ${MAX_CATEGORY_DEPTH}`
+  const parent = await Category.findById(req.body.parentId).exec();
+
+  if (!parent)
+    throw new ResourceNotFoundError(
+      `Parent category with id '${req.body.parentId}' does not exist.`
     );
 
   const category = await Category.create({
     name: req.body.name,
-    parent: req.params.parentId,
-  }).exec();
-  res.status(StatusCodes.CREATED).json({ category: category.name });
+    parent: req.body.parentId,
+  });
+  res.status(StatusCodes.CREATED).json({ _id: category._id });
 });
 
-// Complexity when you delete a category. Expensive.
-/** DELETE. */
-const deleteTopCategory = asyncHandler(async (req, res) => {
+// Expensive!
+/** DELETE */
+const deleteCategory = asyncHandler(async (req, res) => {
   const connection = await connectDB();
   const session = await connection.startSession();
 
-  await session.withTranscation(async () => {
-    // Reducing queries by first deleting. Transaction rolls back
-    // if BadRequestError below is raised.
+  session.withTransaction(async () => {
     let category = await Category.findByIdAndDelete(req.params.id).exec();
-    // Verify category type: top.
-    if (category.parent !== null) {
+    if (!category) {
       throw new BadRequestError(
-        `Requested category '${req.params.id}' is not a top category.`
+        `Category with id '${req.params.id}' does not exist.`
       );
     }
+    // Link children, if they exist, to deleted category's parent.
+    await Category.updateMany(
+      { parent: category._id },
+      { $set: { parent: category.parent } }
+    );
     // Update products that have this as a category.
     await Product.updateMany(
       { categories: category },
-      { $pull: { categories: category } }
+      { $pull: { categories: category.name } }
     );
   });
 
@@ -62,54 +60,31 @@ const deleteTopCategory = asyncHandler(async (req, res) => {
   await connection.close();
 });
 
-/** DELETE. */
-const deleteSubcategory = asyncHandler(async (req, res) => {
-  const connection = await connectDB();
-  const session = await connection.startSession();
-
-  await session.withTranscation(async () => {
-    let category = await Category.findByIdAndDelete(req.params.id).exec();
-    if (category.parent === null) {
-      throw new BadRequestError(
-        `Requested category '${req.params.id}' is not a top category.`
-      );
-    }
-    // Update products that have this as a category.
-    // Update products that have this as a category.
-    await Product.updateMany(
-      { categories: category },
-      { $pull: { categories: category } }
-    );
-  });
-
-  await session.endSession();
-  await connection.close();
-});
-
-// Should be cached.
-/** GET. */
-const getCategoryStructure = asyncHandler(async (req, res) => {
-  // Build category trees.
-  let categoryTrees = [];
-  const topCategories = await Category.find()
-    .where({ parent: null })
-    .sort("name")
-    .exec();
-
-  topCategories.forEach(async (category) => {
-    const subcategories = await Category.find({
-      parent: category._id,
-    }).exec();
-    categoryTrees.push({ category: subcategories });
-  });
-
-  return categoryTrees;
+// Should be cached. Returns category tree to a depth of 4. (Root nodes
+// are at depth 0.)
+/** GET */
+const getCategoryTree = asyncHandler(async (req, res) => {
+  const categories = await Category.aggregate([
+    {
+      $graphLookup: {
+        from: "categories",
+        startWith: "$_id",
+        connectFromField: "_id",
+        connectToField: "parent",
+        as: "subcats",
+        maxDepth: 4,
+      },
+    },
+    {
+      $match: { parent: null },
+    },
+  ]);
+  res.status(StatusCodes.OK).json(categories);
 });
 
 export {
-  createTopCategory,
+  createRootCategory,
   createSubcategory,
-  deleteTopCategory,
-  deleteSubcategory,
-  getCategoryStructure,
+  deleteCategory,
+  getCategoryTree,
 };

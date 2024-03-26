@@ -1,20 +1,18 @@
 import express from "express";
 
 import {
-  getCategoryStructure,
+  getCategoryTree,
   createSubcategory,
-  createTopCategory,
-  deleteTopCategory,
-  deleteSubcategory,
+  createRootCategory,
+  deleteCategory,
 } from "../controllers/category.js";
 
 const categoryRouter = express.Router();
 
 // These routes are all protected by adminAuthMiddleware.
-categoryRouter.route("/").get(getCategoryStructure);
-categoryRouter.route("/top/create").post(createTopCategory);
-categoryRouter.route("/sub/create").post(createSubcategory);
-categoryRouter.route("/top/:id").delete(deleteTopCategory);
-categoryRouter.route("/sub/:id").delete(deleteSubcategory);
+categoryRouter.route("/").get(getCategoryTree);
+categoryRouter.route("/root").post(createRootCategory);
+categoryRouter.route("/sub").post(createSubcategory);
+categoryRouter.route("/:id").delete(deleteCategory);
 
 export { categoryRouter };
