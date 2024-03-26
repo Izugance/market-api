@@ -11,6 +11,7 @@ const categorySchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: "Category",
     default: null,
+    index: true,
   },
 });
 
