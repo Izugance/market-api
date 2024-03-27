@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import mongoose from "mongoose";
 import { StatusCodes } from "http-status-codes";
 
 import { connectDB } from "../config/db.js";
