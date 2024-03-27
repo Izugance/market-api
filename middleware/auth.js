@@ -29,6 +29,7 @@ const adminAuthMiddleware = asyncHandler(async (req, res, next) => {
   const authHeader = req.header("authorization");
   let payload = verifyAuthHeader(authHeader, "admin, env.ADMIN_JWT_SECRET");
   req.admin = { adminId: payload.adminId, token };
+  next();
 });
 
 export { userAuthMiddleware, adminAuthMiddleware };
